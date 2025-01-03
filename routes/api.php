@@ -140,6 +140,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     // Collection
  Route::prefix('collections')->middleware('auth:sanctum')->group(function () {
+
         Route::post('/', [ContractController::class, 'handleCollections']);
         Route::get('/service/{serviceId}', [ContractController::class, 'getCollectionsByService']);
         Route::get('/user', [ContractController::class, 'getCollectionsByUser']);
@@ -147,12 +148,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/sales', [CollectionController::class, 'getAllCollectionsBySales']);
         Route::post('/{collectionId}/approval', [CollectionController::class, 'updateApproval']);
         Route::post('/{collectionId}/status', [CollectionController::class, 'updateStatus']);
-
-
+        Route::get('/team/{contract_id}', [CollectionController::class, 'getCollectionPercentageByContract']); // Percentage of collection for team
+        Route::post('/{id}', [CollectionController::class, 'updateCollectionWithAdjustments']);
     });
 });
 
-Route::post('/collections/{id}', [CollectionController::class, 'updateCollectionWithAdjustments']);
 
 Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
 
@@ -160,19 +160,12 @@ Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/collections/{contract_id}', action: [CollectionController::class, 'getTeamcollections']);
 });
 
+
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('layouts', LayoutController::class);
+    Route::get('/contracts/{contractId}/layouts', [TaskController::class, 'getContractLayouts']);
 });
-
-
-// APIS FOR  OWNER ONLY
-
-
-
-
-
-
-
 
 
 //Teams
@@ -185,22 +178,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/teams', [TeamController::class, 'store']);
     });
 
-    Route::get('/teamleader/members', [TeamController::class, 'getTeamLeaderMembers']);
-    Route::middleware('role:manager')->get('/teams/members', [TeamController::class, 'getAllTeamsByType']);
-    Route::get('/my-teama', [TeamController::class, 'getMyTeamAndLeader']);
+        Route::get('/teamleader/members', [TeamController::class, 'getTeamLeaderMembers']);
+        Route::get('/my-team', [TeamController::class, 'getMyTeamandLeader']);
+
+     Route::middleware('role:manager')->get('/teams/members', [TeamController::class, 'getAllTeamsByType']);
+
 });
 
 
 
 Route::middleware('auth:sanctum')->group(function () {
-
+    Route::get('/tasks/user', [TaskController::class, 'getUserTasks']);//get task by user_id
     Route::post('/task/assign', [TaskController::class, 'assignTasksToTeamMember']);
-    Route::get('/tasks', [TaskController::class, 'getUserTasks']);
-    Route::get('/admin/tasks', [TaskController::class, 'getAllTasks']);
-    Route::patch('/tasks/{task_id}/status', [TaskController::class, 'updateTaskStatus']);
+
+    Route::get('/tasks/team', [TaskController::class, 'getTeamTasks']);
+    Route::get('/tasks', [TaskController::class, 'getAllTasksv2']);
+
+    Route::get('/tasks/status/{task_id}', [TaskController::class, 'updateTaskStatus']);//for user
+    Route::get('/tasks/approval/{task_id}', [TaskController::class, 'approveTask']); //for teamleader
+
+    Route::get('/tasks/admin', [TaskController::class, 'getAllTasks']); // not used yet
+
+
 });
 
-Route::get('/mytasks', [TaskController::class, 'getAllTaskss']);
 
 
 //notes
@@ -242,9 +243,9 @@ Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
     });
 });
 
-
+   //owner
 Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
-    //owner
+
     Route::get('/grouped-by-date', [OwnerDashboardController::class, 'getCollectionsGroupedByMonthAndYear']);
     Route::get('/grouped-by-sales-employee', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeUsingRelation']);
     Route::get('/grouped-by-Service', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeAndService']);
@@ -254,54 +255,42 @@ Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(fu
     Route::get('/totaly-report', [BonusController::class, 'gettotalyReport']);
 });
 
+
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
 
     Route::get('/collection/filter', [UserFilterationController::class, 'getCollectionsGroupedByAuthUser']);
 });
 
-// Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
-    
-    Route::post('/{id}', [SalaryController::class, 'updateSalaryById']);
+
+//salary
+Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
     Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
     Route::post('/technical', [SalaryController::class, 'calculateTechnicalSalaries']);
     Route::post('/employee', [SalaryController::class, 'addSalary']);
     Route::post('/deduction/{id}', [SalaryController::class, 'addDeduction']);
     Route::delete('/{id}', [SalaryController::class, 'deletesalary']);
-
-    
-// });
+});
 
 
-
-
-
-Route::post('/bonuses', [BonusController::class, 'createBonus']);
-Route::get('/bonuses', [BonusController::class, 'getAllBonuses']);
-Route::get('/bonuses/{id}/check', [BonusController::class, 'checkBonusStatus']);
-Route::delete('/bonuses/{id}', [BonusController::class, 'deleteBonus']);
-
-
-
-
-
-
-Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
-
-
-
-
+//bonuses
+Route::prefix('bonuses')->middleware('auth:sanctum')->group(function () {
+    Route::post('/', [BonusController::class, 'createBonus']);
+    Route::get('/', [BonusController::class, 'getAllBonuses']);
+    Route::get('/{id}/check', [BonusController::class, 'checkBonusStatus']);
+    Route::delete('/{id}', [BonusController::class, 'deleteBonus']);
 });
 
 
 
-Route::middleware('auth:sanctum')->get('/user/team', [userDashboardController::class, 'getTeamId']);
+Route::middleware('auth:sanctum')->group(function () {
 
-Route::middleware('auth:sanctum')->get('/sales', [CollectionController::class, 'getCollectionsByAuthUser']);
+    Route::get('/user/team', [userDashboardController::class, 'getTeamId']);
+    Route::get('/sales', [CollectionController::class, 'getCollectionsByAuthUser']);
+    Route::get('/collections', [CollectionController::class, 'getCollectionss']);
+    Route::get('/sales-employees', [CollectionController::class, 'getAllSalesEmployeesWithCollections']);
 
-Route::middleware('auth:sanctum')->get('/collections', [CollectionController::class, 'getCollectionss']);
+});
 
-
-Route::middleware('auth:sanctum')->get('/sales-employees', [CollectionController::class, 'getAllSalesEmployeesWithCollections']);
 
 
 
