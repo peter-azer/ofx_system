@@ -1,6 +1,6 @@
 <?php
-
-use App\Http\Controllers\BonusController;
+//ress
+ use App\Http\Controllers\BonusController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
