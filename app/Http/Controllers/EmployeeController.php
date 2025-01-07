@@ -86,7 +86,7 @@ class EmployeeController extends Controller
             'role' => 'required|string|exists:roles,name',
             'national_id'=>'required|string|unique:users,national_id',
             'birth_date'=>'required|date',
-            'team_id' => 'required|integer|exists:teams,id',
+            'team_id' => 'integer|exists:teams,id',
             'department_id' => 'required|integer|exists:departments,id',
             'permissions' => 'sometimes|array',
             'permissions.*' => 'string|exists:permissions,name',
