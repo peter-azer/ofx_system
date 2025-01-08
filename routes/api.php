@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 //sales //leads
 //sales //leads
-Route::middleware('auth:sanctum')->group(function () {
+// Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/leads/create', [LeadsController::class, 'create']); //with check
     Route::get('/leads/{id}/check-followup', [LeadsController::class, 'checkFollowUp']);
@@ -74,7 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('leads/user', [LeadsController::class, 'getLeadsWithDetails']);
     Route::get('leads/filter_status/{status}', [LeadsController::class, 'filterLeadsByStatus']);
     Route::get('leads/all/filter_status/{status}', [LeadsController::class, 'filterallLeadsByStatus']);
-});
+// });
 
 Route::middleware('auth:sanctum')->prefix('offers')->group(function () {
     Route::post('/', [LeadsController::class, 'addOffer']);
