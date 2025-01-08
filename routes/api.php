@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 //sales //leads
 //sales //leads
-Route::group(function () {
+Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/leads/create', [LeadsController::class, 'create']); //with check
     Route::get('/leads/{id}/check-followup', [LeadsController::class, 'checkFollowUp']);
