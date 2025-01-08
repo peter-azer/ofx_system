@@ -64,7 +64,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add/role', [EmployeeController::class, 'addRole']);
 });
 //sales //leads
-Route::middleware('auth:sanctum')->group(function () {
+//sales //leads
+Route::group(function () {
 
     Route::post('/leads/create', [LeadsController::class, 'create']); //with check
     Route::get('/leads/{id}/check-followup', [LeadsController::class, 'checkFollowUp']);
