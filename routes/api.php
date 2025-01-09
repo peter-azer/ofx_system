@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/leads/{id}/status', [LeadsController::class, 'updateStatus']);
 
     Route::get('leads/user', [LeadsController::class, 'getLeadsWithDetails']);
+    Route::get('all-leads', [LeadsController::class, 'getAllLeads']);
     Route::get('leads/filter_status/{status}', [LeadsController::class, 'filterLeadsByStatus']);
     Route::get('leads/all/filter_status/{status}', [LeadsController::class, 'filterallLeadsByStatus']);
 });
