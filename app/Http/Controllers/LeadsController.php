@@ -225,6 +225,11 @@ class LeadsController extends Controller
         return $leads;
     }
 
+    public function getAllLeads()
+    {
+        $leads = Lead::with(['followups', 'offers', 'notes'])->get();
+        return $leads;
+    }
 
 
     public function filterLeadsByStatus(Request $request)
