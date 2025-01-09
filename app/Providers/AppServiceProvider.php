@@ -49,32 +49,32 @@ public function boot(): void
 
     // Define a Gate for sales access
     Gate::define('access-sales', function ($user) {
-        return $user->hasRole('sales')||$user->hasRole('owner');
+        return $user->hasRole('sales')||$user->hasRole('owner') ||$user->hasRole('teamleader') ||$user->hasRole('manager') ||$user->hasRole('sales_employee');
     });
 
     Gate::define('teams', function ($user) {
-        return $user->hasRole('owner')&&  $user->hasPermission('team_view')&& $user->hasRole('teamleader');
+        return $user->hasRole('sales')||$user->hasRole('owner') ||$user->hasRole('teamleader') ||$user->hasRole('manager') ||$user->hasRole('sales_employee');
     });
 
 
     Gate::define('owner', function ($user) {
-        return $user->hasRole('owner');
+        return $user->hasRole('sales')||$user->hasRole('owner') ||$user->hasRole('teamleader') ||$user->hasRole('manager') ||$user->hasRole('sales_employee');
     });
 
 
     Gate::define('department-control', function ($user) {
-        return $user->hasRole('owner') && $user->hasPermission('manage_department');
+        return $user->hasRole('sales')||$user->hasRole('owner') ||$user->hasRole('teamleader') ||$user->hasRole('manager') ||$user->hasRole('sales_employee');
     });
 
     Gate::define('services_control', function ($user) {
 
-        return $user->hasRole('owner') || $user->can('manage_services');
+        return $user->hasRole('sales')||$user->hasRole('owner') ||$user->hasRole('teamleader') ||$user->hasRole('manager') ||$user->hasRole('sales_employee');
     });
 
 
     Gate::define('team_control', function ($user) {
 
-        return $user->hasRole('owner') || $user->can('manage_teams');
+        return $user->hasRole('sales')||$user->hasRole('owner') ||$user->hasRole('teamleader') ||$user->hasRole('manager') ||$user->hasRole('sales_employee');
     });
 
 }
