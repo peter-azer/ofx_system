@@ -60,7 +60,7 @@ class ContractController extends Controller
 
             'client' => 'required|array',
             'client.name' => 'required|string',
-            'client.email' => 'string|email',
+            'client.email' => 'string|email|nullable',
             'client.company_name' => 'required|string',
             'client.phone' => 'required|string',
 
