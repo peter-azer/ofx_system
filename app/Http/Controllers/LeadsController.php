@@ -214,51 +214,49 @@ class LeadsController extends Controller
         return $leads;
     }
 
-public function getTeamLeads()
-    {
-        $manager = auth()->user();
+public function getLeadsWithDetails()
+{
+    $manager = auth()->user();
 
-        // Retrieve the manager's teams and their associated users
-        $teams = $manager->teams()->with(['users.leads'])->get();
+    // Retrieve the manager's teams and their associated users and leads
+    $teams = $manager->teams()->with(['users.leads', 'teamLeader'])->get();
 
-        // Structure the response
-        $response = $teams->map(function ($team) {
-            return [
-                'team_name' => $team->name,
-                'team_details' => [
-                    'team_leader' => $team->teamleader_id,
-                    'service_id' => $team->service_id,
-                    'branch' => $team->branch,
-                ],
-                'members' => $team->users->map(function ($member) {
-                    return [
-                        'member_name' => $member->name,
-                        'member_email' => $member->email,
-                        'leads' => $member->leads->map(function ($lead) {
-                            return [
-                                'lead_id' => $lead->id,
-                                'company_name' => $lead->company_name,
-                                'client_name' => $lead->client_name,
-                                'status' => $lead->status,
-                                'phone' => $lead->phone,
-                                'created_at' => $lead->created_at,
-                                'details' => [
-                                    'followups' => $lead->followups,
-                                    'offers' => $lead->offers,
-                                    'notes' => $lead->notes,
-                                ],
-                            ];
-                        }),
-                    ];
-                }),
-            ];
+    // Flatten the structure to leads with team and sales details
+    $response = $teams->flatMap(function ($team) {
+        return $team->users->flatMap(function ($user) use ($team) {
+            return $user->leads->map(function ($lead) use ($team, $user) {
+                return [
+                    'lead_id' => $lead->id,
+                    'company_name' => $lead->company_name,
+                    'client_name' => $lead->client_name,
+                    'status' => $lead->status,
+                    'created_at' => $lead->created_at,
+                    'details' => [
+                        'followups' => $lead->followups,
+                        'offers' => $lead->offers,
+                        'notes' => $lead->notes,
+                    ],
+                    'team' => [
+                        'team_name' => $team->name,
+                        'team_leader' => $team->teamleader_id,
+                        'service_id' => $team->service_id,
+                        'branch' => $team->branch,
+                    ],
+                    'sales_person' => [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                    ],
+                ];
+            });
         });
+    });
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $response,
-        ]);
-    }
+    return response()->json([
+        'status' => 'success',
+        'data' => $response,
+    ]);
+}
+
 
     public function filterLeadsByStatus(Request $request)
     {
