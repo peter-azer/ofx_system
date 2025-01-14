@@ -240,6 +240,7 @@ public function getTeamLeads()
                                 'company_name' => $lead->company_name,
                                 'client_name' => $lead->client_name,
                                 'status' => $lead->status,
+                                'phone' => $lead->phone,
                                 'created_at' => $lead->created_at,
                                 'details' => [
                                     'followups' => $lead->followups,
