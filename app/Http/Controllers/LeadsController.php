@@ -229,6 +229,7 @@ public function getTeamLeads()
                     'lead_id' => $lead->id,
                     'company_name' => $lead->company_name,
                     'client_name' => $lead->client_name,
+                    'phone' => $lead->phone,
                     'status' => $lead->status,
                     'created_at' => $lead->created_at,
                     'details' => [
