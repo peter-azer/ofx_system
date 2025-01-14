@@ -259,9 +259,12 @@ public function getTeamLeads()
 }
 
 // get leads for teamleaders
-    public function getTeamLeadsForTeamLeader($teamLeader)
+    public function getTeamLeadsForTeamLeader(Request $request)
     {
-        // Retrieve the teams managed by the team leader
+        // Assuming the authenticated user is the team leader
+        $teamLeader = auth()->user();
+
+        // Retrieve the teams and leads
         $teams = $teamLeader->teams()->with(['users.leads'])->get();
 
         // Structure the response
