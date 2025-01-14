@@ -30,24 +30,7 @@ class LeadsController extends Controller
     /**
      * Create a lead
      */
-    // public function create(Request $request)
-    // {
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|email',
-    //         'phone*' => 'required|array|string',
-    //     ]);
-
-    //     $lead = Lead::create([
-    //         'sales_id' => auth()->user()->id,
-    //         'name' => $request->name,
-    //         'email' => $request->email,
-    //         'phone' => $request->phone,
-    //         'status' => 'new',
-    //     ]);
-
-    //     return response()->json(['message' => 'Lead created successfully', 'lead' => $lead], 201);
-    // }
+    
 
     public function checkFollowUp($id)
     {
@@ -254,7 +237,8 @@ public function getTeamLeads()
                         'leads' => $member->leads->map(function ($lead) {
                             return [
                                 'lead_id' => $lead->id,
-                                'lead_name' => $lead->name,
+                                'company_name' => $lead->company_name,
+                                'client_name' => $lead->client_name,
                                 'status' => $lead->status,
                                 'created_at' => $lead->created_at,
                                 'details' => [
@@ -274,7 +258,6 @@ public function getTeamLeads()
             'data' => $response,
         ]);
     }
-
 
     public function filterLeadsByStatus(Request $request)
     {
