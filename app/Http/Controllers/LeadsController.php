@@ -214,7 +214,7 @@ class LeadsController extends Controller
         return $leads;
     }
 
-public function getLeadsWithDetails()
+public function getTeamLeads()
 {
     $manager = auth()->user();
 
