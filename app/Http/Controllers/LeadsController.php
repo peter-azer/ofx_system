@@ -258,6 +258,51 @@ public function getTeamLeads()
     ]);
 }
 
+// get leads for teamleaders
+    public function getTeamLeadsForTeamLeader($teamLeader)
+    {
+        // Retrieve the teams managed by the team leader
+        $teams = $teamLeader->teams()->with(['users.leads'])->get();
+
+        // Structure the response
+        $response = $teams->map(function ($team) {
+            return [
+                'team_name' => $team->name,
+                'team_details' => [
+                    'team_leader' => $team->teamleader_id,
+                    'service_id' => $team->service_id,
+                    'branch' => $team->branch,
+                ],
+                'members' => $team->users->map(function ($member) {
+                    return [
+                        'member_name' => $member->name,
+                        'member_email' => $member->email,
+                        'leads' => $member->leads->map(function ($lead) {
+                            return [
+                                'lead_id' => $lead->id,
+                                'company_name' => $lead->company_name,
+                                'client_name' => $lead->client_name,
+                                'status' => $lead->status,
+                                'created_at' => $lead->created_at,
+                                'details' => [
+                                    'followups' => $lead->followups,
+                                    'offers' => $lead->offers,
+                                    'notes' => $lead->notes,
+                                ],
+                            ];
+                        }),
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $response,
+        ]);
+    }
+    // ==========================================================================
+
 
     public function filterLeadsByStatus(Request $request)
     {
