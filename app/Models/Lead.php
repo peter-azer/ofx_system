@@ -35,5 +35,10 @@ class Lead extends Model
     {
         return $this->morphMany(Note::class, 'notable');
     }
+
+    public function salesEmployee()
+    {
+        return $this->belongsTo(User::class, 'sales_id');
+    }
 }
 
