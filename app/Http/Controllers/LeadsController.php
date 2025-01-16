@@ -264,7 +264,7 @@ public function getTeamLeads()
     $user = Auth::user();
     $teamId = $user->leader->id;
 
-    return Lead::with('*') // Load all defined relationships dynamically
+    return Lead::with(['salesEmployee']) // Load all defined relationships dynamically
         ->whereHas('salesEmployee', function ($query) use ($teamId) {
             $query->where('team_id', $teamId);
         })
