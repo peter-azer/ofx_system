@@ -23,57 +23,60 @@ class TaskController extends Controller
     {
         $user = auth()->user();
 
-
-        // if ($user->hasRole('owner')) {
-        //     return response()->json(['message' => 'Permission denied: Only for owners .'], 403);
-        // }
-
-
+        // Validate request
         $request->validate([
             'status' => 'required|string',
         ]);
 
-
+        // Find contract with services
         $contract = Contract::with('services')->findOrFail($id);
 
-        
+        // Check if contract is already approved
         if ($contract->status === 'approved') {
             return response()->json(['message' => 'The contract is already approved.'], 200);
         }
 
+        // Update contract status
         $contract->status = $request->status;
         $contract->save();
 
-
+        // Check if the status is 'approved'
         if ($contract->status === 'approved') {
+            // Only proceed if the contract has exactly one service
+            if ($contract->services->count() === 1) {
+                // Fetch all teams with their users
+                $teams = Team::with('users')->get();
 
+                // Loop through contract services
+                foreach ($contract->services as $service) {
+                    // Find a team associated with the service
+                    $team = $teams->firstWhere('service_id', $service->id);
 
-            $teams = Team::with('users')->get();
-
-
-            foreach ($contract->services as $service) {
-
-
-                $team = $teams->firstWhere('service_id', $service->id);
-
-
-                if ($team) {
-                    Task::create([
-                        'fromable_id' => $contract->id,
-                        'fromable_type' => 'contract',
-                        'task' => $service->name,
-                        'assigned_type' => 'team',
-                        'assigned_id' => $team->id,
-                    ]);
+                    // If a team is found, create a task
+                    if ($team) {
+                        Task::create([
+                            'fromable_id' => $contract->id,
+                            'fromable_type' => 'contract',
+                            'task' => $service->name,
+                            'assigned_type' => 'team',
+                            'assigned_id' => $team->id,
+                        ]);
+                    }
                 }
-            }
 
-            return response()->json(['message' => 'Status updated and tasks auto-assigned successfully',$contract->services], 200);
+                return response()->json([
+                    'message' => 'Status updated and tasks auto-assigned successfully',
+                    'services' => $contract->services,
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Status updated successfully, but tasks were not auto-assigned because the contract has more than one service.',
+                ], 200);
+            }
         }
 
         return response()->json(['message' => 'Status updated successfully'], 200);
     }
-
 
 
 
