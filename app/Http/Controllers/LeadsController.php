@@ -260,15 +260,16 @@ public function getTeamLeads()
 
 // get leads for teamleaders
     public function getTeamLeadsForTeamLeader()
-    {
-        $user = Auth::user();
-        $teamId = $user->leader->id;
-        return Lead::with(['client','salesEmployee'])
-            ->whereHas('sales_id', function ($query) use ($teamId) {
-                $query->where('team_id', $teamId);
-            })
-            ->get();
-    }
+{
+    $user = Auth::user();
+    $teamId = $user->leader->id;
+
+    return Lead::with('*') // Load all defined relationships dynamically
+        ->whereHas('sales_id', function ($query) use ($teamId) {
+            $query->where('team_id', $teamId);
+        })
+        ->get();
+}
     // ==========================================================================
 
 
