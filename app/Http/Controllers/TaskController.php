@@ -121,7 +121,7 @@ class TaskController extends Controller
 
 public function getApprovedTasks() 
     {
-        $tasks = Contract::where('status', 'approved')->get();
+        $tasks = Contract::where('status', 'approved')->with('contractService')->get();
         return response()->json([
             'success' => true,
             'data' => $tasks,
