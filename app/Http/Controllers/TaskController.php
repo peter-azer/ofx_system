@@ -119,6 +119,15 @@ class TaskController extends Controller
     return response()->json(['tasks' => $tasks], 200);
 }
 
+public function getApprovedTasks() 
+    {
+        $tasks = Contract::where('status', 'approved')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $tasks,
+        ], 200);
+    }
+
 
     /**
      * Allow team leaders to assign tasks to members in their team.
