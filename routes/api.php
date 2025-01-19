@@ -196,7 +196,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/task/assign', [TaskController::class, 'assignTasksToTeamMember']);
 
     Route::get('/tasks/team', [TaskController::class, 'getTeamTasks']);
-    Route::get('/tasks', [TaskController::class, 'getAllTasksv2']);
+    Route::get('/tasks', [TaskController::class, 'getApprovedTasks']);
 
     Route::get('/tasks/status/{task_id}', [TaskController::class, 'updateTaskStatus']);//for user
     Route::get('/tasks/approval/{task_id}', [TaskController::class, 'approveTask']); //for teamleader
