@@ -126,7 +126,7 @@ class TaskController extends Controller
         // })->get();
         // dd($tasks->service_id);
         $tasks = Task::query()
-            // ->where('')
+            ->with('fromable', 'assigned')
             // ->where('status', 'approved')
             // ->with(['services', 'salesEmployee', 'client'])
             ->get();
