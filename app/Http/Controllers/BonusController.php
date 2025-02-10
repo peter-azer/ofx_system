@@ -105,9 +105,14 @@ class BonusController extends Controller
             ->sum('total_amount');
 
         // Get total salaries (net_salary + bonus_amount)
-        $totalSalaries = MonthlySalary::whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->sum(\DB::raw('net_salary + bonus_amount'));
+        $totalNet = MonthlySalary::whereYear('created_at', $year)
+        ->whereMonth('created_at', $month)
+        ->sum('net_salary');
+        $totalBonus = MonthlySalary::whereYear('created_at', $year)
+        ->whereMonth('created_at', $month)
+        ->sum('bonus_amount');
+
+        $totalSalaries = $totalNet + $totalBonus;
 
         // Calculate total monthly expenses
         $totalMonthlyExpenses = $totalMonthlyLiabilities + $totalSalaries;
