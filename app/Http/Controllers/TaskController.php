@@ -30,7 +30,6 @@ class TaskController extends Controller
 
         // Find contract with services
         $contract = Contract::with('services')->findOrFail($id);
-
         // Check if contract is already approved
         if ($contract->status === 'approved') {
             return response()->json(['message' => 'The contract is already approved.'], 200);
@@ -51,6 +50,7 @@ class TaskController extends Controller
                 foreach ($contract->services as $service) {
                     // Find a team associated with the service
                     $team = $teams->firstWhere('service_id', $service->id);
+                    // dd($team);
 
                     // If a team is found, create a task
                     if ($team) {
@@ -106,23 +106,31 @@ class TaskController extends Controller
 
 
     public function getAllTasksv2()
-{
+    {
 
-    $tasks = Task::with(['assigned', 'fromable'])->get();
+        $tasks = Task::with(['assigned', 'fromable'])->get();
 
 
-    if ($tasks->isEmpty()) {
-        return response()->json(['message' => 'No tasks found.'], 404);
+        if ($tasks->isEmpty()) {
+            return response()->json(['message' => 'No tasks found.'], 404);
+        }
+
+
+        return response()->json(['tasks' => $tasks], 200);
     }
 
-
-    return response()->json(['tasks' => $tasks], 200);
-}
-
-public function getApprovedTasks() 
+    public function getApprovedTasks()
     {
-        $tasks = Contract::where('status', 'approved')->with(['services', 'salesEmployee', 'client'])->get();
-        
+        // $tasks = ContractService::whereHas('contract', function ($query) {
+        //     $query->get();
+        // })->get();
+        // dd($tasks->service_id);
+        $tasks = Task::query()
+            // ->where('')
+            // ->where('status', 'approved')
+            // ->with(['services', 'salesEmployee', 'client'])
+            ->get();
+
         return response()->json([
             'success' => true,
             'data' => $tasks,
@@ -138,7 +146,7 @@ public function getApprovedTasks()
     public function assignTasksToTeamMember(Request $request)
     {
         $user = auth()->user();
-        if (!$user->hasRole('owner') && !$user->hasRole('team_leader')&& !$user->hasRole('manager')) {
+        if (!$user->hasRole('owner') && !$user->hasRole('team_leader') && !$user->hasRole('manager')) {
             return response()->json(['message' => 'Permission denied'], 403);
         }
 
@@ -174,6 +182,7 @@ public function getApprovedTasks()
     {
         $user = auth()->user();
 
+        // dd($user);
         // Fetch tasks assigned to the authenticated user
         $tasks = Task::where('assigned_id', $user->id)->get();
 
@@ -286,7 +295,4 @@ public function getApprovedTasks()
 
         return response()->json($tasks);
     }
-
-
-
 }
