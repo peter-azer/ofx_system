@@ -28,7 +28,11 @@ class Service extends Model
     // {
     //     return $this->morphTo();
     // }
-
+    
+    public function subServieces()
+    {
+        return $this->hasMany(SubServiece::class);
+    }
 
 
 
