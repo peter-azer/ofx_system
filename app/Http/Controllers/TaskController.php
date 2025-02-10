@@ -50,11 +50,12 @@ class TaskController extends Controller
                 foreach ($contract->services as $service) {
                     // Find a team associated with the service
                     $team = $teams->firstWhere('service_id', $service->id);
-                    // dd($team);
+                    // dd($team->teamleader_id);
 
                     // If a team is found, create a task
                     if ($team) {
                         Task::create([
+                            'team_leader_id' => $team->teamleader_id,
                             'fromable_id' => $contract->id,
                             'fromable_type' => 'contract',
                             'task' => $service->name,
@@ -121,16 +122,20 @@ class TaskController extends Controller
 
     public function getApprovedTasks()
     {
-        // $tasks = ContractService::whereHas('contract', function ($query) {
-        //     $query->get();
-        // })->get();
-        // dd($tasks->service_id);
-        $tasks = Task::query()
-            ->with('fromable', 'assigned')
-            // ->where('status', 'approved')
-            // ->with(['services', 'salesEmployee', 'client'])
+        $leader = Team::query()
+            ->where('teamleader_id', auth()->user()->id)
             ->get();
-
+        // dd($leader);
+        if ($leader) {
+            $tasks = Task::query()
+                ->where('team_leader_id', auth()->user()->id)
+                ->with('fromable', 'assigned')
+                ->get();
+        } else {
+            $tasks = Task::query()
+                ->with('fromable', 'assigned')
+                ->get();
+        }
         return response()->json([
             'success' => true,
             'data' => $tasks,

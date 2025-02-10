@@ -9,7 +9,7 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['fromable_id','fromable_type', 'task', 'assigned_type', 'assigned_id','stauts','is_approval'];
+    protected $fillable = ['team_leader_id','fromable_id','fromable_type', 'task', 'assigned_type', 'assigned_id','stauts','is_approval'];
 
 
 
