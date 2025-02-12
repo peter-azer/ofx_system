@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->date('date');
             $table->text('invoice')->nullable();
-            $table->enum('status', ['Pending', 'Paid'])->default('Pending');
+            $table->enum('status', ['Pending', 'Paid', 'Cash'])->default('Pending');
             $table->enum('is_approval', ['true', 'false'])->default('false');
             $table->softDeletes();
             $table->timestamps();

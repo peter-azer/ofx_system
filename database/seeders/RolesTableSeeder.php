@@ -31,7 +31,6 @@ class RolesTableSeeder extends Seeder
 
                 // Create Admin User
                 $admin = User::updateOrCreate(
-                    ['email' => 'admin@example.com'], // Unique identifier
                     [
                         'name' => 'Admin User',
                         'email' => 'admin@example.com',
