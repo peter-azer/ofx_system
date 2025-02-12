@@ -35,6 +35,9 @@ class RolesTableSeeder extends Seeder
                     [
                         'name' => 'Admin User',
                         'email' => 'admin@example.com',
+                        'phone' => '100100',
+                        'National_id' => '100100',
+                        'birth_date' => now(),
                         'password' => Hash::make('password123'), // Change the password
                         ]
                     );
