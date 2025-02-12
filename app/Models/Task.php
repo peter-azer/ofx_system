@@ -37,7 +37,6 @@ class Task extends Model
     {
         return $this->belongsTo(User::class, 'team_leader_id');
     }
-
     public function notes()
     {
         return $this->morphMany(Note::class, 'notable');

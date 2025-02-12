@@ -122,18 +122,20 @@ class TaskController extends Controller
 
     public function getApprovedTasks()
     {
-        $leader = Team::query()
-            ->where('teamleader_id', auth()->user()->id)
-            ->get();
-        // dd($leader);
-        if ($leader) {
+        $user = auth()->user();
+        if ($user->hasRole('owner')) {
+            $tasks = Task::query()
+                ->with('fromable', 'assigned', 'teamLeader', 'fromable.client', 'fromable.salesEmployee')
+                ->get();
+        } elseif ($user->hasRole('teamleader')) {
             $tasks = Task::query()
                 ->where('team_leader_id', auth()->user()->id)
-                ->with('fromable', 'assigned')
+                ->with('fromable', 'assigned', 'teamLeader', 'fromable.client', 'fromable.salesEmployee')
                 ->get();
-        } else {
+        } elseif ($user->hasAnyRole(['sales_employee', 'technical_employee'])) {
             $tasks = Task::query()
-                ->with('fromable', 'assigned')
+                ->where('assigned_id', auth()->user()->id)
+                ->with('fromable', 'assigned', 'teamLeader', 'fromable.client', 'fromable.salesEmployee')
                 ->get();
         }
         return response()->json([
