@@ -48,7 +48,7 @@ class SubServieceController extends Controller
         );
         try {
             $assign = SubServiece::create($assign);
-            return response()->json($assign);
+            return response()->json($assign, 201);
         } catch (\Exception $e) {
             return response()->json($e->getMessage());
         }
