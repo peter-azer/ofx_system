@@ -13,6 +13,9 @@ class Task extends Model
 
 
 
+    public function subServices(){
+        return $this->hasMany(SubServiece::class, 'service_id');
+    }
     public function fromable()
     {
         return $this->morphTo();

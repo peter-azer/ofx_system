@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class RolesTableSeeder extends Seeder
 {
@@ -26,5 +28,18 @@ class RolesTableSeeder extends Seeder
 
         // Insert roles into the database
         DB::table('roles')->insert($roles);
+
+                // Create Admin User
+                $admin = User::updateOrCreate(
+                    ['email' => 'admin@example.com'], // Unique identifier
+                    [
+                        'name' => 'Admin User',
+                        'email' => 'admin@example.com',
+                        'password' => Hash::make('password123'), // Change the password
+                        ]
+                    );
+                    
+                    // Assign Role
+                    $admin->assignRole('owner');
     }
 }
