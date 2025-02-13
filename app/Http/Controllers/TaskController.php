@@ -124,9 +124,16 @@ class TaskController extends Controller
     public function getApprovedTasks()
     {
         $managerTeams = DB::table('manager_team')
-        ->where('user_id', auth()->user()->id)
-        ->get();   
-        dd($managerTeams);
+            ->where('user_id', auth()->user()->id)
+            ->get();
+        $teams = [];
+        foreach ($managerTeams as $team) {
+            $teams[] = $team->team_id;
+        }
+        $teamAll = Team::whereIn('id', $teams)->get();
+        foreach ($teamAll as $index => $leader) {
+            $leaders[] = $teamAll[$index]->teamleader_id;
+        }
         $user = auth()->user();
         if ($user->hasRole('owner')) {
             $tasks = Task::query()
@@ -134,7 +141,7 @@ class TaskController extends Controller
                 ->get();
         } elseif ($user->hasRole('manager')) {
             $tasks = Task::query()
-                ->where('team_leader_id', $managerTeams)
+                ->whereIn('team_leader_id', $leaders)
                 ->with('fromable', 'assigned', 'teamLeader', 'fromable.client', 'fromable.salesEmployee')
                 ->get();
         } elseif ($user->hasRole('teamleader')) {
