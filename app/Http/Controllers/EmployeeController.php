@@ -133,6 +133,7 @@ class EmployeeController extends Controller
         return response()->json(['message' => 'Login successful',
           'token' => $token,
            'role' => $role,
+           'userName'=> $user->name,
            'permissions' => $permissions,
 
 
