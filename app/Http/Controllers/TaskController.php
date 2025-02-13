@@ -13,6 +13,7 @@ use App\Models\ContractService;
 use App\Models\ContractServiceLayout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -122,9 +123,18 @@ class TaskController extends Controller
 
     public function getApprovedTasks()
     {
+        $managerTeams = DB::table('manager_team')
+        ->where('user_id', auth()->user()->id)
+        ->get();   
+        dd($managerTeams);
         $user = auth()->user();
         if ($user->hasRole('owner')) {
             $tasks = Task::query()
+                ->with('fromable', 'assigned', 'teamLeader', 'fromable.client', 'fromable.salesEmployee')
+                ->get();
+        } elseif ($user->hasRole('manager')) {
+            $tasks = Task::query()
+                ->where('team_leader_id', $managerTeams)
                 ->with('fromable', 'assigned', 'teamLeader', 'fromable.client', 'fromable.salesEmployee')
                 ->get();
         } elseif ($user->hasRole('teamleader')) {
