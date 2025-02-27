@@ -135,8 +135,6 @@ class EmployeeController extends Controller
            'role' => $role,
            'userName'=> $user->name,
            'permissions' => $permissions,
-
-
         ], 200);
     }
 
