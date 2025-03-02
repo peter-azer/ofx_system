@@ -29,6 +29,7 @@ Route::get('/user', function (Request $request) {
     $user = $request->user();
     return response()->json([
         "user" => $user,
+        "team" => $user->team,
         "role" => $user->getRoleNames()
     ]);
 })->middleware('auth:sanctum');
