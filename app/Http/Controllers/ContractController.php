@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Services\ContractServices;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 class ContractController extends Controller
 {
     use AuthorizesRequests;
@@ -128,7 +130,7 @@ class ContractController extends Controller
                     // If status is paid, upload the proof of payment
                     if ($collectionData['status'] === 'paid' && $request->hasFile("services.{$serviceKey}.collections.{$collectionKey}.proof_of_payment")) {
                         $file = $request->file("services.{$serviceKey}.collections.{$collectionKey}.proof_of_payment");
-                        $path = $file->store('proof_of_payments', 'public');
+                        $path = URL::to(Storage::url($file->store('proof_of_payments', 'public')));
 
                         $collection->update(['proof_of_payment' => $path]);
                     }
