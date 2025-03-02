@@ -82,8 +82,8 @@ class LeadsController extends Controller
             'company_name' => 'required|string|max:255',
             'client_name' => 'required|string|max:255',
             'email' => 'email|nullable',
-            'phone' => 'nullable|array|min:1',
-            'phone.*' => 'string|max:15',
+            // 'phone' => 'required|array|min:1',
+            // 'phone.*' => 'string|max:15',
             'from_where' => 'required|string|max:255',
         ]);
 
