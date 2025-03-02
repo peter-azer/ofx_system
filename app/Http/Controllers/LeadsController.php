@@ -9,6 +9,9 @@ use App\Models\FollowUp;
 use App\Models\Offer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+
 class LeadsController extends Controller
 {
 
@@ -30,7 +33,7 @@ class LeadsController extends Controller
     /**
      * Create a lead
      */
-    
+
 
     public function checkFollowUp($id)
     {
@@ -127,7 +130,7 @@ class LeadsController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-           'status' => 'required|string|max:255|in:new,in_progress,closed',
+            'status' => 'required|string|max:255|in:new,in_progress,closed',
         ]);
 
         $lead = Lead::find($id);
@@ -178,7 +181,7 @@ class LeadsController extends Controller
 
         if ($request->hasFile('offer') && $request->file('offer')->isValid()) {
 
-            $filePath = $request->file('offer')->store('offers', 'public');
+            $filePath = URL::to(Storage::url($request->file('offer')->store('offers', 'public')));
 
             $offer = Offer::create([
                 'lead_id' => $request->lead_id,
@@ -214,62 +217,62 @@ class LeadsController extends Controller
         return $leads;
     }
 
-public function getTeamLeads()
-{
-    $manager = auth()->user();
+    public function getTeamLeads()
+    {
+        $manager = auth()->user();
 
-    // Retrieve the manager's teams and their associated users and leads
-    $teams = $manager->teams()->with(['users.leads', 'teamLeader'])->get();
+        // Retrieve the manager's teams and their associated users and leads
+        $teams = $manager->teams()->with(['users.leads', 'teamLeader'])->get();
 
-    // Flatten the structure to leads with team and sales details
-    $response = $teams->flatMap(function ($team) {
-        return $team->users->flatMap(function ($user) use ($team) {
-            return $user->leads->map(function ($lead) use ($team, $user) {
-                return [
-                    'lead_id' => $lead->id,
-                    'company_name' => $lead->company_name,
-                    'client_name' => $lead->client_name,
-                    'phone' => $lead->phone,
-                    'status' => $lead->status,
-                    'created_at' => $lead->created_at,
-                    'details' => [
-                        'followups' => $lead->followups,
-                        'offers' => $lead->offers,
-                        'notes' => $lead->notes,
-                    ],
-                    'team' => [
-                        'team_name' => $team->name,
-                        'team_leader' => $team->teamleader_id,
-                        'service_id' => $team->service_id,
-                        'branch' => $team->branch,
-                    ],
-                    'sales_person' => [
-                        'name' => $user->name,
-                        'email' => $user->email,
-                    ],
-                ];
+        // Flatten the structure to leads with team and sales details
+        $response = $teams->flatMap(function ($team) {
+            return $team->users->flatMap(function ($user) use ($team) {
+                return $user->leads->map(function ($lead) use ($team, $user) {
+                    return [
+                        'lead_id' => $lead->id,
+                        'company_name' => $lead->company_name,
+                        'client_name' => $lead->client_name,
+                        'phone' => $lead->phone,
+                        'status' => $lead->status,
+                        'created_at' => $lead->created_at,
+                        'details' => [
+                            'followups' => $lead->followups,
+                            'offers' => $lead->offers,
+                            'notes' => $lead->notes,
+                        ],
+                        'team' => [
+                            'team_name' => $team->name,
+                            'team_leader' => $team->teamleader_id,
+                            'service_id' => $team->service_id,
+                            'branch' => $team->branch,
+                        ],
+                        'sales_person' => [
+                            'name' => $user->name,
+                            'email' => $user->email,
+                        ],
+                    ];
+                });
             });
         });
-    });
 
-    return response()->json([
-        'status' => 'success',
-        'data' => $response,
-    ]);
-}
+        return response()->json([
+            'status' => 'success',
+            'data' => $response,
+        ]);
+    }
 
-// get leads for teamleaders
+    // get leads for teamleaders
     public function getTeamLeadsForTeamLeader()
-{
-    $user = Auth::user();
-    $teamId = $user->leader->id;
+    {
+        $user = Auth::user();
+        $teamId = $user->leader->id;
 
-    return Lead::with(['salesEmployee']) // Load all defined relationships dynamically
-        ->whereHas('salesEmployee', function ($query) use ($teamId) {
-            $query->where('team_id', $teamId);
-        })
-        ->get();
-}
+        return Lead::with(['salesEmployee']) // Load all defined relationships dynamically
+            ->whereHas('salesEmployee', function ($query) use ($teamId) {
+                $query->where('team_id', $teamId);
+            })
+            ->get();
+    }
     // ==========================================================================
 
 
