@@ -40,9 +40,10 @@ Route::post('/login', [EmployeeController::class, 'login']);
 
 // Group of routes for user management, protected by 'auth:sanctum' middleware
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/users/{id}', [EmployeeController::class, 'updateUser']);
+    Route::put('/users/{id}', [EmployeeController::class, 'updateUser']);
     Route::get('/users', [EmployeeController::class, 'getallusers']);
     Route::post('/add_employee', [EmployeeController::class, 'register']);
+    // Route::post('/edit_employee/{id}', [EmployeeController::class, 'update']);
     Route::delete('/user/{id}', [EmployeeController::class, 'deleteUser']);
     Route::post('/user/{id}/password', [EmployeeController::class, 'updatePassword']);
     Route::get('/teamleaders', [EmployeeController::class, 'index']);
