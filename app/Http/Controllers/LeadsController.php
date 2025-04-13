@@ -19,7 +19,6 @@ class LeadsController extends Controller
 
     public function __construct()
     {
-
         $this->authorize('access-sales');
     }
 
@@ -214,7 +213,37 @@ class LeadsController extends Controller
     public function getAllLeads()
     {
         $leads = Lead::with(['followups', 'offers', 'notes'])->get();
-        return $leads;
+        // Flatten the structure to leads with team and sales details
+        $response = $leads->flatMap(function ($team) {
+            return $team->users->flatMap(function ($user) use ($team) {
+                return $user->leads->map(function ($lead) use ($team, $user) {
+                    return [
+                        'lead_id' => $lead->id,
+                        'company_name' => $lead->company_name,
+                        'client_name' => $lead->client_name,
+                        'phone' => $lead->phone,
+                        'status' => $lead->status,
+                        'created_at' => $lead->created_at,
+                        'details' => [
+                            'followups' => $lead->followups,
+                            'offers' => $lead->offers,
+                            'notes' => $lead->notes,
+                        ],
+                        'team' => [
+                            'team_name' => $team->name,
+                            'team_leader' => $team->teamleader_id,
+                            'service_id' => $team->service_id,
+                            'branch' => $team->branch,
+                        ],
+                        'sales_person' => [
+                            'name' => $user->name,
+                            'email' => $user->email,
+                        ],
+                    ];
+                });
+            });
+        });
+        return $response;
     }
 
     public function getTeamLeads()
@@ -270,8 +299,7 @@ class LeadsController extends Controller
         return Lead::with(['salesEmployee']) // Load all defined relationships dynamically
             ->whereHas('salesEmployee', function ($query) use ($teamId) {
                 $query->where('team_id', $teamId);
-            })
-            ->get();
+            })->get();
     }
     // ==========================================================================
 
