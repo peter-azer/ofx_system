@@ -82,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/leads/{id}/status', [LeadsController::class, 'updateStatus']);
     Route::get('leads/user', [LeadsController::class, 'getLeadsWithDetails']);
     Route::get('all-leads', [LeadsController::class, 'getAllLeads']);
-    Route::get('lead/assign/{id}', [LeadsController::class, 'assignLead']);
+    Route::put('lead/assign/{id}', [LeadsController::class, 'assignLead']);
     Route::get('team-leads', [LeadsController::class, 'getTeamLeads']);
     Route::get('teamleader-leads', [LeadsController::class, 'getTeamLeadsForTeamLeader']);
     Route::get('leads/filter_status/{status}', [LeadsController::class, 'filterLeadsByStatus']);
