@@ -234,7 +234,7 @@ class LeadsController extends Controller
         $manager = auth()->user();
 
         // Retrieve the manager's teams and their associated users and leads
-        $teams = $manager->teams()->with(['users.leads', 'teamLeader'])->get();
+        $teams = $manager->teams()->with(['users.leads', 'teamLeader', 'users.leads.followups', 'users.leads.offers'])->get();
 
         // Flatten the structure to leads with team and sales details
         $response = $teams->flatMap(function ($team) {
@@ -279,7 +279,7 @@ class LeadsController extends Controller
         $user = Auth::user();
         $teamId = $user->leader->id;
 
-        return Lead::with(['salesEmployee']) // Load all defined relationships dynamically
+        return Lead::with(['salesEmployee', 'followups', 'offers']) // Load all defined relationships dynamically
             ->whereHas('salesEmployee', function ($query) use ($teamId) {
                 $query->where('team_id', $teamId);
             })->get();
