@@ -144,6 +144,18 @@ class LeadsController extends Controller
         return response()->json(['message' => 'Status updated successfully', 'lead' => $lead], 200);
     }
 
+    public function assignLead(Request $request, $id){
+        $lead = Lead::find($id);
+        if (!$lead) {
+            return response()->json(['message' => 'Lead not found'], 404);
+        }
+        $request->validate([
+            'sales_id' => 'required|exists:users,id',
+        ]);
+        $lead->sales_id = $request->sales_id;
+        $lead->save();
+        return response()->json(['message' => 'Lead assigned successfully', 'lead' => $lead], 200);
+    }
     /**
      * Add a follow-up
      */
