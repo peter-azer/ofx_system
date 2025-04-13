@@ -129,7 +129,7 @@ class LeadsController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|max:255|in:new,in_progress,closed',
+            'status' => 'required|string|max:255|in:new,in_progress,closed,contracted',
         ]);
 
         $lead = Lead::find($id);
