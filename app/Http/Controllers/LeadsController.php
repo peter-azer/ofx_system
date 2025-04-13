@@ -212,9 +212,11 @@ class LeadsController extends Controller
 
     public function getAllLeads()
     {
-        $leads = Lead::with(['followups', 'offers', 'notes'])->get();
-        // Flatten the structure to leads with team and sales details
-        $response = $leads->flatMap(function ($team) {
+        try{
+
+            $leads = Lead::with(['followups', 'offers', 'notes'])->get();
+            // Flatten the structure to leads with team and sales details
+            $response = $leads->flatMap(function ($team) {
             return $team->users->flatMap(function ($user) use ($team) {
                 return $user->leads->map(function ($lead) use ($team, $user) {
                     return [
@@ -231,7 +233,7 @@ class LeadsController extends Controller
                         ],
                         'team' => [
                             'team_name' => $team->name,
-                            'team_leader' => $team->teamleader_id,
+                            'team_leader_id' => $team->teamleader_id,
                             'service_id' => $team->service_id,
                             'branch' => $team->branch,
                         ],
@@ -244,6 +246,9 @@ class LeadsController extends Controller
             });
         });
         return $response;
+    }catch(\Exception $e){
+        return response()->json(['error' => 'An error occurred while fetching leads.'], 500);
+        }
     }
 
     public function getTeamLeads()
