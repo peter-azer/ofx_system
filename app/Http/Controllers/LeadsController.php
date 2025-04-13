@@ -145,7 +145,7 @@ class LeadsController extends Controller
     }
 
     public function assignLead(Request $request, $id){
-        $lead = Lead::find($id);
+        $lead = Lead::findOrFail($id);
         if (!$lead) {
             return response()->json(['message' => 'Lead not found'], 404);
         }
