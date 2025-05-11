@@ -15,15 +15,7 @@ use Carbon\Carbon;
 class EmployeeController extends Controller
 {
 
-
-    // public function __construct()
-    // {
-
-    //     $this->middleware('permission:addemployee')->only('register');
-    // }
-
-
-    public function getAllusers()
+    public function index() #Done
     {
         $user = auth()->user();
 
@@ -59,7 +51,6 @@ class EmployeeController extends Controller
     {
         $user = auth()->user();
 
-
         if (!$user->hasRole('owner')) {
             return response()->json(['message' => 'Permission denied: Only owners'], 403);
         }
@@ -68,136 +59,56 @@ class EmployeeController extends Controller
         return response()->json($roles);
     }
 
-
-    public function register(Request $request)
+    public function update(Request $request, $id)  #Done
     {
-        $user = auth()->user();
+        try {
 
-        // // Check for the required permissions
-        if (!$user->hasRole('owner') && !$user->can('addemployee')) {
-            return response()->json(['message' => 'Permission denied: Only owners or users with the addemployee permission can create users.'], 403);
-        }
-
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'required|string',
-            'role' => 'required|string|exists:roles,name',
-            'national_id' => 'required|string|unique:users,national_id',
-            'birth_date' => 'required|date',
-            'team_id' => 'integer|exists:teams,id',
-            'department_id' => 'required|integer|exists:departments,id',
-            'permissions' => 'sometimes|array',
-            'permissions.*' => 'string|exists:permissions,name',
-        ]);
-
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'National_id' => $request->national_id,
-            'birth_date' => $request->birth_date,
-            'team_id' => $request->team_id,
-            'department_id' => $request->department_id,
-        ]);
-
-
-        $user->assignRole($request->role);
-
-        if ($request->permissions) {
-            $user->syncPermissions($request->permissions);
-        }
-        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
-    }
-
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::where('email', $request->email)->with('team')->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-        $role = $user->getRoleNames();
-        $permissions = $user->getAllPermissions(); // This will return a collection of permissions
-
-        return response()->json([
-            'message' => 'Login successful',
-            'token' => $token,
-            'role' => $role,
-            'team' => $user->team,
-            'userName' => $user->name,
-            'permissions' => $permissions,
-        ], 200);
-    }
-
-    public function updateUser(Request $request, $id)
-    {
-        $user = auth()->user();
-
-        // Permission check
-        // if (!$user->hasRole('owner') && !$user->can('updateuserinfo')) {
-        //     return response()->json(['message' => 'Permission denied: Only owners or users with the updateuserinfo permission can update user info.'], 403);
-        // }
-
-        // Fetch the user by ID
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-        // Validate input
-        $request->validate([
+            $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'email' => 'sometimes|email|unique:users,email,' . $id,
             'password' => 'sometimes|string|min:6',
+            'phone' => 'sometimes|string',
             'role' => 'sometimes|string|exists:roles,name',
+            'national_id' => 'sometimes|string|unique:users,national_id,' . $id,
+            'birth_date' => 'sometimes|date',
             'team_id' => 'sometimes|integer|exists:teams,id',
             'department_id' => 'sometimes|integer|exists:departments,id',
             'permissions' => 'sometimes|array',
             'permissions.*' => 'string|exists:permissions,name',
-        ]);
+            ]);
 
+            $user = User::find($id);
 
-        $user->update($request->only([
-            'name',
-            'email',
-            'password',
-            'team_id',
-            'department_id',
-        ]));
-        $user->save();
-
-        // Update role and permissions
-        if ($request->has('role')) {
-            $user->syncRoles([$request->role]);
-            $role = Role::findByName($request->role);
-
-            if ($role) {
-                $user->syncPermissions($role->permissions);
+            if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
             }
-        }
 
-        // Sync provided permissions if sent
-        if ($request->has('permissions')) {
+            $user->update([
+            'name' => $request->name ?? $user->name,
+            'email' => $request->email ?? $user->email,
+            'phone' => $request->phone ?? $user->phone,
+            'password' => $request->password ? Hash::make($request->password) : $user->password,
+            'National_id' => $request->national_id ?? $user->National_id,
+            'birth_date' => $request->birth_date ?? $user->birth_date,
+            'team_id' => $request->team_id ?? $user->team_id,
+            'department_id' => $request->department_id ?? $user->department_id,
+            ]);
+
+            if ($request->role) {
+            $user->syncRoles([$request->role]);
+            }
+
+            if ($request->permissions) {
             $user->syncPermissions($request->permissions);
-        }
+            }
 
-        return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+            return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+        } catch (\Exception $error) {
+            return response()->json(['message' => $error->getMessage()], 500);
+        }
     }
 
-    public function deleteUser($id)
+    public function destroy($id)  #Done
     {
 
         $currentuser = auth()->user();
@@ -216,37 +127,13 @@ class EmployeeController extends Controller
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
 
-    public function updatePassword(Request $request, $id)
-    {
-
-        $currentuser = auth()->user();
-        if (!$currentuser->hasRole('owner')) {
-            return response()->json(['message' => 'Permission denied: Only owners or users with the update_Password permission can update user info.'], 403);
-        }
-        $request->validate([
-            'password' => 'required|string|min:6',
-        ]);
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        return response()->json(['message' => 'Password updated successfully'], 200);
-    }
-
-
-
     public function addRole(Request $request)
     {
         $currentUser = auth()->user();
 
         // Permission check
         if (!$currentUser->hasRole('owner') && !$currentUser->can('addrole')) {
-            return response()->json(['message' => 'Permission denied: Only owners or users with the addrole permission can create roles.'], 403);
+            return response()->json(['message' => 'Permission denied: Only owners or users with the add role permission can create roles.'], 403);
         }
 
         // Validate incoming request
@@ -267,7 +154,7 @@ class EmployeeController extends Controller
         }
     }
 
-    public function index()
+    public function teamLeaders()  #Done
     {
         $currentUser = auth()->user();
 
@@ -285,7 +172,7 @@ class EmployeeController extends Controller
     /**
      * Soft delete a user by ID.
      */
-    public function softDeleteUser($id)
+    public function softDeleteUser($id)  #Done
     {
 
         $user = auth()->user();
@@ -308,7 +195,7 @@ class EmployeeController extends Controller
     /**
      * Restore a soft-deleted user by ID.
      */
-    public function restoreUser($id)
+    public function restoreUser($id)  #Done
     {
 
         $user = auth()->user();

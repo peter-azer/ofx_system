@@ -8,7 +8,7 @@ use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\Leads_adminController;
 use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\NoteController;
-use App\Http\Controllers\OwnerDashboardController;
+use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\userDashboardController;
@@ -25,6 +25,11 @@ use App\Http\Controllers\PriceListController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\SubServieceController;
 
+// =====================================================
+use App\Http\Controllers\Auth\AuthController;
+
+
+
 Route::get('/user', function (Request $request) {
     $user = $request->user();
     return response()->json([
@@ -34,19 +39,29 @@ Route::get('/user', function (Request $request) {
     ]);
 })->middleware('auth:sanctum');
 
-Route::post('/login', [EmployeeController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 
-//Auth: login and users registrations => routes
+Route::middleware(['auth:sanctum', 'role:owner'])->group(function(){
+    // add new user
+    Route::post('/add_employee', [AuthController::class, 'register']);
+    // update users data
+    Route::put('/users/{id}', [EmployeeController::class, 'update']);
+    // get all users data
+    Route::get('/users', [EmployeeController::class, 'index']);
+    // delete users from the system permanently
+    Route::delete('/user/{id}', [EmployeeController::class, 'destroy']);
+    // soft delete any users not totally
+    Route::delete('/user/{id}', [EmployeeController::class, 'softDeleteUser']);
+    // restore deleted users
+    Route::delete('/user/{id}', [EmployeeController::class, 'restoreUser']);
+    // display all team leaders
+    Route::get('/team/leaders', [EmployeeController::class, 'teamLeaders']);
+});
 
 // Group of routes for user management, protected by 'auth:sanctum' middleware
 Route::middleware('auth:sanctum')->group(function () {
-    Route::put('/users/{id}', [EmployeeController::class, 'updateUser']);
-    Route::get('/users', [EmployeeController::class, 'getallusers']);
-    Route::post('/add_employee', [EmployeeController::class, 'register']);
     // Route::post('/edit_employee/{id}', [EmployeeController::class, 'update']);
-    Route::delete('/user/{id}', [EmployeeController::class, 'deleteUser']);
-    Route::post('/user/{id}/password', [EmployeeController::class, 'updatePassword']);
-    Route::get('/teamleaders', [EmployeeController::class, 'index']);
+
     Route::get('/roles', [EmployeeController::class, 'getAllRoles']);
     Route::get('/Permissions', [EmployeeController::class, 'getAllPermissions']);
 });

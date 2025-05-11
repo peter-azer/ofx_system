@@ -23,7 +23,8 @@ class CollectionController extends Controller
     {
         $this->collectionService = $collectionService;
 
-    }    public function getAllCollectionsBySales()
+    }    
+    public function getAllCollectionsBySales()
     {
 
         $user = auth()->user();
